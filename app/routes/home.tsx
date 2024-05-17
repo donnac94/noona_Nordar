@@ -24,35 +24,47 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 	return new Response('Unauthorized', { status: 401 });
 };
-
 export default function Home() {
-    const { user, accessToken} = useLoaderData<typeof loader>();
+    const { user, accessToken } = useLoaderData<typeof loader>();
     const [products, setProducts] = useState<any>(null);
     const [stockLevels, setStockLevels] = useState<{ [key: string]: number }>({});
+    
     if (!user) return null;
 
-	// eslint-disable-next-line react-hooks/rules-of-hooks, react-hooks/exhaustive-deps
-	useEffect(() => {
-		if (accessToken) {
-			getProducts(accessToken);
-		}
-	}, [user, accessToken]);
+    useEffect(() => {
+        if (accessToken) {
+            getProducts(accessToken);
+        }
+    }, [user, accessToken]);
 
-    async function getProducts(access_token: any) {
-        const productsResponse1 = await listGroupsAndProducts(undefined, {headers: {Authorization: `Bearer ${accessToken}`}});
-        console.log("productsResponse1 is ", productsResponse1)
+    async function getProducts(accessToken: any) {
+        const productsResponse1 = await listGroupsAndProducts(undefined, { headers: { Authorization: `Bearer ${accessToken}` } });
+        console.log("productsResponse1 is ", productsResponse1);
         setProducts(productsResponse1);
         return productsResponse1;
     }
-    async function updateProductGroup(id: any, stock: any){
-        await updateProduct(id, {stock_level: stock},undefined, {headers: {Authorization: `Bearer ${accessToken}`}})
-        getProducts(accessToken)
-        stockLevels[id]= ''
+
+    async function updateProductGroup(id: any, stock: any) {
+        await updateProduct(id, { stock_level: stock }, undefined, { headers: { Authorization: `Bearer ${accessToken}` } });
     }
+
+    async function updateAllProducts() {
+        const updatePromises = Object.keys(stockLevels).map((id) => {
+            const stock = stockLevels[id];
+            if (stock !== undefined && stock !== '') {
+                return updateProductGroup(id, stock);
+            }
+            return Promise.resolve();
+        });
+        await Promise.all(updatePromises);
+        getProducts(accessToken);
+        setStockLevels({});
+    }
+
     const handleInputChange = (productId: string, value: string) => {
         setStockLevels((prev) => ({
             ...prev,
-            [productId]: Number(value),
+            [productId]: value ? Number(value) : ''
         }));
     };
 
@@ -61,26 +73,25 @@ export default function Home() {
             <h1 className="text-6xl text-white font-bold mb-8">Hi, {user.email} 👋</h1>
             <h3 className="text-4xl text-white font-bold mb-8">Welcome to stock inventory manager</h3>
             <p className="text-xl text-white mb-4">You are logged in 🎉</p>
-            {products&&products.data[0].group_products.map((product: any) => (
-                <div key={product.title} className='flex flex-row mt-5'>
+            {products && products.data[0].group_products.map((product: any) => (
+                <div key={product.id} className='flex flex-row mt-5'>
                     <p className="text-4xl text-white font-bold mb-8">{product.title}</p>
-                    <p className="text-4xl text-white font-bold mb-8 ml-8"> {product.stock_level}</p>
-                                    <input
-                 type="number"
-                 placeholder="Enter Stock Level"
-                 value={stockLevels[product.id] || ''}
-                 onChange={(e) => handleInputChange(product.id, e.target.value)}
-                 className="mb-2 p-2 ml-5"
-             />
-             <button
-                 onClick={() => updateProductGroup(product.id, stockLevels[product.id] || 0)}
-                 className="p-2 bg-blue-500 text-white rounded ml-5"
-             >
-                 Update Stock Level
-             </button> 
+                    <p className="text-4xl text-white font-bold mb-8 ml-8">{product.stock_level}</p>
+                    <input
+                        type="number"
+                        placeholder="Enter Stock Level"
+                        value={stockLevels[product.id] || ''}
+                        onChange={(e) => handleInputChange(product.id, e.target.value)}
+                        className="mb-2 p-2 ml-5"
+                    />
                 </div>
-
             ))}
+            <button
+                onClick={updateAllProducts}
+                className="p-2 bg-blue-500 text-white rounded mt-5"
+            >
+                Update All Stock Levels
+            </button>
         </div>
     );
 }
