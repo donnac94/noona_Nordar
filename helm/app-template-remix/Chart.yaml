@@ -1,5 +1,0 @@
-apiVersion: v2
-type: application
-name: app-template-remix
-description: app-template-remix-description-placeholder
-version: 1.0.0-latest

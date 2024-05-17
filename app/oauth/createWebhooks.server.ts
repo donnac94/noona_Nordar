@@ -9,8 +9,8 @@ type CreateWebhookParams = {
 export const createWebhooks = async ({ token, companyId }: CreateWebhookParams) => {
 	const { data: webhook } = await createWebhook(
 		{
-			title: 'app-template-remix webhook',
-			description: 'A webhook for the app-template-remix',
+			title: 'noona_Nordar webhook',
+			description: 'A webhook for the noona_Nordar',
 			callback_url: `${process.env.APP_BASE_URL!}/webhook/event_created`,
 			company: companyId,
 			enabled: true,
