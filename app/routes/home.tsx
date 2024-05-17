@@ -13,11 +13,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		// TODO: Verify signature against Noona public key
 		const idToken = jose.decodeJwt(url.searchParams.get('id_token')!);
 		const user = await getUserByCompanyId({ companyId: idToken['company_id'] as string });
-        const newAccessTokens = await refreshTokenExchange({ refreshToken: user.token.refreshToken });
-        console.log("User is ", user)
-        // console.log("company_id is ", idToken['company_id'] as string)
+		const newAccessTokens = await refreshTokenExchange({ refreshToken: user.token.refreshToken });
+		console.log('User is ', user);
+		// console.log("company_id is ", idToken['company_id'] as string);
 
-		return { user, accessToken: newAccessTokens.access_token};
+		return { user, accessToken: newAccessTokens.access_token };
 	} catch (exception) {
 		console.error(exception);
 	}
@@ -31,14 +31,12 @@ export default function Home() {
     const [stockLevels, setStockLevels] = useState<{ [key: string]: number }>({});
     if (!user) return null;
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks, react-hooks/exhaustive-deps
-    useEffect(() => {
-    
-        if(accessToken){
-            getProducts(accessToken)
-        }
-
-    }, [user, accessToken]);
+	// eslint-disable-next-line react-hooks/rules-of-hooks, react-hooks/exhaustive-deps
+	useEffect(() => {
+		if (accessToken) {
+			getProducts(accessToken);
+		}
+	}, [user, accessToken]);
 
     async function getProducts(access_token: any) {
         const productsResponse1 = await listGroupsAndProducts(undefined, {headers: {Authorization: `Bearer ${accessToken}`}});
