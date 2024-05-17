@@ -7,8 +7,14 @@ import { getUserFromToken } from '~/oauth/getUserFromToken.server';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const url = new URL(request.url);
+    const id_token = url.searchParams.get('id_token');
+	const action = url.searchParams.get('action');
 	const code = url.searchParams.get('code');
 	const scopes = url.searchParams.getAll('scope') ?? [];
+    
+	if (id_token) {
+		return redirect(`/home?id_token=${id_token}&action=${action}`);
+	}
 
 	if (!code) {
 		return redirect('/');
