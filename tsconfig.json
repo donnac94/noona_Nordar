@@ -1,5 +1,5 @@
 {
-	"include": ["remix.env.d.ts", "**/*.ts", "**/*.tsx", "orval.config.js"],
+	"include": ["remix.env.d.ts", "**/*.ts", "**/*.tsx", "orval.config.js", "app/helpers/google.js"],
 	"compilerOptions": {
 		"lib": ["DOM", "DOM.Iterable", "ES2022"],
 		"isolatedModules": true,
